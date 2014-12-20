@@ -1,3 +1,5 @@
+[![wercker status](https://app.wercker.com/status/23e399b3060642a83bdaa46b8ff5eb5f/m "wercker status")](https://app.wercker.com/project/bykey/23e399b3060642a83bdaa46b8ff5eb5f)
+
 Pagination Over Martini
 =======================
 
