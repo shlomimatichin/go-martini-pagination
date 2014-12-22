@@ -32,6 +32,7 @@ func Service(c martini.Context, req *http.Request, r render.Render) {
 	pagination.Page = 0
 	pagination.PerPage = DefaultPerPage
 	pagination.total = math.MaxUint32
+	pagination.result = make([]interface{}, 0)
 	if len(req.URL.Query()["perpage"]) > 0 {
 		if len(req.URL.Query()["perpage"]) > 1 {
 			panic("More than one perpage parameter attached to get url")

@@ -31,6 +31,7 @@ func Test_Defaults(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	expect(t, len(result["data"].([]interface{})), 3)
 	expectInt(t, result["data"].([]interface{})[0], 0)
 	expectInt(t, result["data"].([]interface{})[1], 0)
 	expectInt(t, result["data"].([]interface{})[2], 20)
@@ -57,10 +58,32 @@ func Test_PageSpecified(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	expect(t, len(result["data"].([]interface{})), 3)
 	expectInt(t, result["data"].([]interface{})[0], 8)
 	expectInt(t, result["data"].([]interface{})[1], 8*20)
 	expectInt(t, result["data"].([]interface{})[2], 20)
 	expectInt(t, result["total"], 300)
+}
+
+func Test_EmptyResult(t *testing.T) {
+	m := martini.Classic()
+	m.Use(render.Renderer())
+	m.Get("/foobar", Service, func(pagi *Pagination) {
+		pagi.SetTotal(0)
+	})
+	res := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/foobar", nil)
+
+	m.ServeHTTP(res, req)
+
+	expect(t, res.Code, 200)
+	var result map[string]interface{}
+	err := json.Unmarshal([]byte(res.Body.String()), &result)
+	if err != nil {
+		panic(err)
+	}
+	expect(t, len(result["data"].([]interface{})), 0)
+	expectInt(t, result["total"], 0)
 }
 
 func expect(t *testing.T, a interface{}, b interface{}) {
