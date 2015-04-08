@@ -27,6 +27,10 @@ func (pagination *Pagination) SetTotal(total uint) {
 	pagination.total = total
 }
 
+func (pagination *Pagination) SetAbort() {
+	pagination.total = math.MaxUint32 - 1
+}
+
 func Service(c martini.Context, req *http.Request, r render.Render) {
 	var pagination Pagination
 	pagination.Page = 0
@@ -56,6 +60,9 @@ func Service(c martini.Context, req *http.Request, r render.Render) {
 	}
 	c.Map(&pagination)
 	c.Next()
+	if pagination.total == math.MaxUint32-1 {
+		return
+	}
 	if pagination.total == math.MaxUint32 {
 		panic("Must set 'SetTotal' on pagination.Pagination")
 	}

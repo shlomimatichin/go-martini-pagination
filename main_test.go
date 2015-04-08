@@ -86,6 +86,27 @@ func Test_EmptyResult(t *testing.T) {
 	expectInt(t, result["total"], 0)
 }
 
+func Test_ErrorAbortsPagination(t *testing.T) {
+	m := martini.Classic()
+	m.Use(render.Renderer())
+	m.Get("/foobar", Service, func(pagi *Pagination, r render.Render) {
+		r.JSON(500, map[string]interface{}{"Error": "internal error"})
+		pagi.SetAbort()
+	})
+	res := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/foobar", nil)
+
+	m.ServeHTTP(res, req)
+
+	expect(t, res.Code, 500)
+	var result map[string]interface{}
+	err := json.Unmarshal([]byte(res.Body.String()), &result)
+	if err != nil {
+		panic(err)
+	}
+	expectString(t, result["Error"], "internal error")
+}
+
 func expect(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
 		t.Errorf("Expected %v (type %v) - Got %v (type %v)", b, reflect.TypeOf(b), a, reflect.TypeOf(a))
@@ -95,5 +116,11 @@ func expect(t *testing.T, a interface{}, b interface{}) {
 func expectInt(t *testing.T, a interface{}, num int) {
 	if int(a.(float64)) != num {
 		t.Errorf("Expected %d - Got %f", num, a.(float64))
+	}
+}
+
+func expectString(t *testing.T, a interface{}, expected string) {
+	if a.(string) != expected {
+		t.Errorf("Expected '%s' - Got '%s'", expected, a.(string))
 	}
 }
