@@ -97,6 +97,9 @@ func Service(c martini.Context, req *http.Request, r render.Render) {
 	if pagination.total == math.MaxUint32 {
 		panic("Must set 'SetTotal' on pagination.Pagination")
 	}
+	if pagination.Offset > 0 && pagination.Page == 0 {
+		pagination.Page = pagination.Offset / pagination.PerPage
+	}
 	resultJSON := map[string]interface{}{
 		"data":    pagination.result,
 		"total":   pagination.total,
